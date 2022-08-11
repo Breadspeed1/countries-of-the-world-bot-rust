@@ -9,3 +9,5 @@ edition = "2021"
 tokio = { version="1.20.1", features=["rt-multi-thread"], default-features=false }
 serenity = { version="0.11.5", default-features=false, features=["client", "gateway", "rustls_backend", "model"] }
 dotenv = "0.15.0"
+mysql = "22.2.0"
+chrono = "0.4.21"

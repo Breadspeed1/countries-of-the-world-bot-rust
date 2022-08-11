@@ -1,4 +1,5 @@
 mod commands;
+mod database;
 
 use std::env;
 use std::error::Error;
