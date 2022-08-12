@@ -3,12 +3,31 @@ mod data_types;
 use std::env;
 use std::error::Error;
 use mysql::{Pool, PooledConn};
+use crate::database::data_types::Territory;
 
 pub async fn get_conn_string() -> Result<String, Box<dyn Error>> {
     Ok(env::var("MYSQL_CONNECTION_STRING")?)
 }
 
-/*pub async fn get_territories() -> Result<>*/
+pub struct Database {
+    connection_factory: SqlConnectionFactory
+}
+
+impl Database {
+    pub async fn new(connection_string: String) -> Result<Database, Box<dyn Error>> {
+        Ok(Database {
+            connection_factory: SqlConnectionFactory::new(connection_string.as_str()).await?
+        })
+    }
+
+    pub async fn get_territories(&self) -> Result<Vec<Territory>, Box<dyn Error>> {
+        let conn: PooledConn = self.connection_factory.get_connection().await?;
+
+
+
+        Ok(vec![])
+    }
+}
 
 struct SqlConnectionFactory {
     pool: Pool

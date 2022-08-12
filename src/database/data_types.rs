@@ -33,7 +33,7 @@ pub struct Conflict {
     aggressor_id: u64,
     victim_country_id: u8,
     aggressor_troops_engaged: u32,
-    arrival_date: u128
+    arrival_date: DateTime<Utc>
 }
 
 pub enum BuildingType {
@@ -90,13 +90,13 @@ struct TypeDefinitionError;
 
 impl Debug for TypeDefinitionError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!("failed to define type")
+        write!(f, "failed to define type")
     }
 }
 
 impl Display for TypeDefinitionError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!("failed to define type")
+        write!(f, "failed to define type")
     }
 }
 

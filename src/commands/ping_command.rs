@@ -1,25 +1,34 @@
 use std::error::Error;
+use mysql::PooledConn;
 use serenity::client::Context;
 use serenity::model::application::interaction::InteractionResponseType;
 use serenity::model::id::GuildId;
 use serenity::model::prelude::interaction::application_command::ApplicationCommandInteraction;
+use serenity::async_trait;
+use crate::commands::CommandHandler;
+use crate::Database;
 
-pub async fn set_command(guild: &GuildId, ctx: &Context) -> Result<(), Box<dyn Error>> {
-    guild.set_application_commands(&ctx.http, |commands| {
-        commands.create_application_command(|command| {
-            command.name("ping").description("Test the bot")
-        })
-    }).await?;
-
-    Ok(())
+pub struct PingCommandHandler {
+    db_connection: PooledConn
 }
 
-pub async fn handle(ctx: &Context, interaction: &ApplicationCommandInteraction) -> Result<(), Box<dyn Error>> {
-    interaction.create_interaction_response(&ctx.http, |response| {
-        response
-            .kind(InteractionResponseType::ChannelMessageWithSource)
-            .interaction_response_data(|message| message.content("hoe"))
-    }).await?;
+#[async_trait]
+impl CommandHandler for PingCommandHandler {
+    async fn handle(&self, interaction: &ApplicationCommandInteraction, ctx: &Context) -> Result<(), Box<dyn Error>> {
+        interaction.create_interaction_response(&ctx.http, |response| {
+            response
+                .kind(InteractionResponseType::ChannelMessageWithSource)
+                .interaction_response_data(|message| message.content("hoe"))
+        }).await?;
 
-    Ok(())
+        Ok(())
+    }
+
+    fn get_command_description(&self) -> String {
+        String::from("test the bot")
+    }
+
+    fn get_command_name(&self) -> String {
+        String::from("ping")
+    }
 }
