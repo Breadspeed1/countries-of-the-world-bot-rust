@@ -1,15 +1,18 @@
 use std::error::Error;
-use mysql::PooledConn;
 use serenity::client::Context;
 use serenity::model::application::interaction::InteractionResponseType;
-use serenity::model::id::GuildId;
-use serenity::model::prelude::interaction::application_command::ApplicationCommandInteraction;
 use serenity::async_trait;
+use serenity::model::prelude::interaction::application_command::ApplicationCommandInteraction;
 use crate::commands::CommandHandler;
-use crate::Database;
 
 pub struct PingCommandHandler {
-    db_connection: PooledConn
+}
+
+impl PingCommandHandler {
+    pub fn temp() -> PingCommandHandler {
+        PingCommandHandler {
+        }
+    }
 }
 
 #[async_trait]
