@@ -5,10 +5,6 @@ use std::error::Error;
 use mysql::{Pool, PooledConn};
 use crate::database::data_types::Territory;
 
-pub async fn get_conn_string() -> Result<String, Box<dyn Error>> {
-    Ok(env::var("MYSQL_CONNECTION_STRING")?)
-}
-
 pub struct Database {
     connection_factory: SqlConnectionFactory
 }
