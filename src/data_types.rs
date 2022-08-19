@@ -17,9 +17,9 @@ pub struct Country {
 }
 
 pub struct User {
-    user_id: u64,
-    money: u64,
-    distance_traveled: f32
+    pub user_id: u64,
+    pub money: u64,
+    pub distance_traveled: f32
 }
 
 pub struct Building {

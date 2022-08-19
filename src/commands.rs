@@ -1,6 +1,7 @@
 use std::env;
 use std::error::Error;
 use std::future::Future;
+use mysql::PooledConn;
 use serenity::client::{Context, EventHandler};
 use serenity::async_trait;
 use serenity::model::gateway::Ready;
@@ -8,13 +9,16 @@ use serenity::model::id::{GuildId};
 use serenity::model::prelude::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::prelude::interaction::Interaction;
 use crate::commands::ping_command::PingCommandHandler;
+use crate::commands::test_command::TestCommandHandler;
 use crate::database::Database;
 
 mod ping_command;
+mod test_command;
 
 pub async fn get_commands() -> Vec<Box<dyn CommandHandler + Send + Sync>> {
     vec![
-        Box::new(PingCommandHandler::temp())
+        Box::new(PingCommandHandler::temp()),
+        Box::new(TestCommandHandler::temp())
     ]
 }
 
@@ -23,6 +27,7 @@ async fn build_commands(ctx: &Context) {
     println!("building commands...");
 
     for command in get_commands().await {
+        println!("building command {}", command.get_command_name());
         command.set_command(&guild, ctx).await;
     }
 
@@ -56,7 +61,7 @@ impl EventHandler for Handler {
 
 #[async_trait]
 pub trait CommandHandler {
-    async fn handle(&self, interaction: &ApplicationCommandInteraction, ctx: &Context) -> Result<(), Box<dyn Error>>;
+    async fn handle(&self, interaction: &ApplicationCommandInteraction, ctx: &Context, db_conn: &PooledConn) -> Result<(), Box<dyn Error>>;
     fn get_command_description(&self) -> String;
     fn get_command_name(&self) -> String;
     async fn set_command(&self, guild: &GuildId, ctx: &Context) {

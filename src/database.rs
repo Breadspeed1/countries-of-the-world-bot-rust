@@ -1,9 +1,8 @@
-mod data_types;
-
 use std::env;
 use std::error::Error;
 use mysql::{Pool, PooledConn};
-use crate::database::data_types::Territory;
+use mysql::prelude::Queryable;
+use crate::data_types::{User};
 
 pub async fn get_conn_string() -> Result<String, Box<dyn Error>> {
     Ok(env::var("MYSQL_CONNECTION_STRING")?)
@@ -20,12 +19,25 @@ impl Database {
         })
     }
 
-    pub async fn get_territories(&self) -> Result<Vec<Territory>, Box<dyn Error>> {
-        let conn: PooledConn = self.connection_factory.get_connection().await?;
+    pub async fn from_conn(conn: &PooledConn) -> Result<Database, Box<dyn Error>> {
 
+        Ok(Database {
 
+        })
+    }
 
-        Ok(vec![])
+    pub async fn get_users(&self) -> Result<Vec<User>, Box<dyn Error>> {
+        let mut conn: PooledConn = self.connection_factory.get_connection().await?;
+
+        let users = conn.
+            query_map(
+                "SELECT * FROM users",
+                |(user_id, money, distance_traveled)| {
+                    User { user_id, money, distance_traveled }
+                }
+            )?;
+
+        Ok(users)
     }
 }
 
