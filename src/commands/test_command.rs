@@ -1,16 +1,17 @@
 use std::error::Error;
 use std::ops::Add;
+use std::sync::Arc;
 use mysql::PooledConn;
 use serenity::client::Context;
 use serenity::model::application::interaction::InteractionResponseType;
 use serenity::async_trait;
 use serenity::model::prelude::interaction::application_command::ApplicationCommandInteraction;
-use crate::commands::CommandHandler;
+use crate::commands::{CommandHandler, CommandHandlerError};
 use crate::data_types::User;
 use crate::Database;
 
 pub struct TestCommandHandler {
-    database: Option<Database>
+    database: Option<Arc<Database>>
 }
 
 impl TestCommandHandler {
@@ -19,15 +20,28 @@ impl TestCommandHandler {
             database: None
         }
     }
+
+    fn get_database(&self) -> Result<Arc<Database>, Box<dyn Error + Send + Sync>> {
+        match &self.database {
+            Some(x) => Ok(Arc::clone(x)),
+            None => Err(Box::new(CommandHandlerError::new()))
+        }
+    }
 }
 
 #[async_trait]
 impl CommandHandler for TestCommandHandler {
-    async fn handle(&self, interaction: &ApplicationCommandInteraction, ctx: &Context, db_conn: &PooledConn) -> Result<(), Box<dyn Error>> {
-        
+    fn from(&self, db: Arc<Database>) -> Box<dyn CommandHandler + Send + Sync> {
+        Box::new(TestCommandHandler {
+            database: Some(db)
+        })
+    }
+
+    async fn handle(&mut self, interaction: &ApplicationCommandInteraction, ctx: &Context, db: Arc<Database>) -> Result<(), Box<dyn Error>> {
+        self.database = Some(db);
 
         let mut m: String = String::from("_");
-        let users: Vec<User> = vec![];
+        let users: Vec<User> = self.get_database().unwrap().get_users().await?;
 
         for i in 0..users.len() {
             m.push_str(format!("id: {}\nmoney: {}\ndistance traveled: {}", users[i].user_id, users[i].money, users[i].distance_traveled).as_str());

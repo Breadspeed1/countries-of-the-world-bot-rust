@@ -4,6 +4,8 @@ mod data_types;
 
 use std::env;
 use std::error::Error;
+use std::sync::Arc;
+use mysql::serde_json::error::Category::Data;
 use serenity::Client;
 use serenity::prelude::GatewayIntents;
 use crate::database::Database;
@@ -15,7 +17,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     dotenv::dotenv().expect("failed to load environment");
     let token = env::var("DISCORD_TOKEN").expect("could not find token in environment");
     let mut client = Client::builder(token, GatewayIntents::empty())
-        .event_handler(commands::Handler { database: Database::new(env::var("SQL_CONNECTION_STRING")?.into()).await? })
+        .event_handler(commands::Handler { database: Arc::new(Database::new(database::get_conn_string().await?).await?) })
         .await
         .expect("error creating client");
 

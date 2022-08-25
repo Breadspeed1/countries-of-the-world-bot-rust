@@ -1,10 +1,11 @@
 use std::error::Error;
-use mysql::PooledConn;
+use std::sync::Arc;
 use serenity::client::Context;
 use serenity::model::application::interaction::InteractionResponseType;
 use serenity::async_trait;
 use serenity::model::prelude::interaction::application_command::ApplicationCommandInteraction;
 use crate::commands::CommandHandler;
+use crate::Database;
 
 pub struct PingCommandHandler {
 }
@@ -18,7 +19,11 @@ impl PingCommandHandler {
 
 #[async_trait]
 impl CommandHandler for PingCommandHandler {
-    async fn handle(&self, interaction: &ApplicationCommandInteraction, ctx: &Context, db_conn: &PooledConn) -> Result<(), Box<dyn Error>> {
+    fn from(&self, db: Arc<Database>) -> Box<dyn CommandHandler + Send + Sync> {
+        Box::new(PingCommandHandler {})
+    }
+
+    async fn handle(&mut self, interaction: &ApplicationCommandInteraction, ctx: &Context, db: Arc<Database>) -> Result<(), Box<dyn Error>> {
         interaction.create_interaction_response(&ctx.http, |response| {
             response
                 .kind(InteractionResponseType::ChannelMessageWithSource)

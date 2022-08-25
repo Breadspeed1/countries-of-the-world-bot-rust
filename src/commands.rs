@@ -1,6 +1,8 @@
 use std::env;
 use std::error::Error;
+use std::fmt::{Debug, Display, Formatter};
 use std::future::Future;
+use std::sync::Arc;
 use mysql::PooledConn;
 use serenity::client::{Context, EventHandler};
 use serenity::async_trait;
@@ -35,7 +37,7 @@ async fn build_commands(ctx: &Context) {
 }
 
 pub struct Handler {
-    pub database: Database
+    pub database: Arc<Database>
 }
 
 #[async_trait]
@@ -52,16 +54,39 @@ impl EventHandler for Handler {
 
             for i in 0..commands.len() {
                 if commands[i].get_command_name() == name {
-                    commands[i].handle(&command, &ctx).await.unwrap();
+                    commands[i].from(self.database.clone()).handle(&command, &ctx, self.database.clone()).await.unwrap();
                 }
             }
         }
     }
 }
 
+struct CommandHandlerError {}
+
+impl CommandHandlerError {
+    pub fn new() -> CommandHandlerError {
+        CommandHandlerError {}
+    }
+}
+
+impl Debug for CommandHandlerError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "A handler error")
+    }
+}
+
+impl Display for CommandHandlerError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Command Handler ran into an error")
+    }
+}
+
+impl Error for CommandHandlerError {}
+
 #[async_trait]
 pub trait CommandHandler {
-    async fn handle(&self, interaction: &ApplicationCommandInteraction, ctx: &Context, db_conn: &PooledConn) -> Result<(), Box<dyn Error>>;
+    fn from(&self, db: Arc<Database>) -> Box<dyn CommandHandler + Send + Sync>;
+    async fn handle(&mut self, interaction: &ApplicationCommandInteraction, ctx: &Context, db: Arc<Database>) -> Result<(), Box<dyn Error>>;
     fn get_command_description(&self) -> String;
     fn get_command_name(&self) -> String;
     async fn set_command(&self, guild: &GuildId, ctx: &Context) {
