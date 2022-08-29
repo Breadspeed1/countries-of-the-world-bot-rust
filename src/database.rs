@@ -3,7 +3,7 @@ use std::error::Error;
 use std::sync::{Arc};
 use mysql::{params, Pool, PooledConn};
 use mysql::prelude::Queryable;
-use crate::data_types::{User};
+use crate::data_types::{Territory, User};
 
 pub async fn get_conn_string() -> Result<String, Box<dyn Error>> {
     Ok(env::var("MYSQL_CONNECTION_STRING")?)
@@ -53,6 +53,45 @@ impl Database {
         let mut conn = self.get_conn().await?;
         let statement = conn.prep(
             "UPDATE users SET (user_id, money, distance_traveled) VALUES(:user_id, :money, :distance_traveled) WHERE user_id = (user_id) VALUES(:user_id)"
+        )?;
+
+        conn.exec_drop(
+            &statement,
+            params! {"user_id" => user.user_id, "money" => user.money, "distance_traveled" => user.distance_traveled }
+        )?;
+
+        Ok(())
+    }
+
+    pub async fn get_territories(&self) -> Result<Vec<Territory>, Box<dyn Error>> {
+        let mut conn = self.get_conn().await?;
+
+        let territories = conn.
+            query_map(
+                "SELECT * FROM territories",
+                |(territory_id, owner_id, color, name)| {
+                    Territory { territory_id, owner_id, color, name  }
+                }
+            )?;
+
+        Ok(territories)
+    }
+
+    pub async fn get_territory_from_id(&self, id: u64) -> Result<Vec<Territory>, Box<dyn Error>> {
+        let mut conn = self.get_conn().await?;
+        let statement = conn.prep("SELECT * FROM users WHERE id = :id")?;
+
+        Ok(conn.exec_map(
+            &statement,
+            params! {"id" => id},
+            |(territory_id, owner_id, color, name)| { Territory { territory_id, owner_id, color, name  } }
+        )?)
+    }
+
+    pub async fn set_territory(&self, territory: Territory) -> Result<(), Box<dyn Error>> {
+        let mut conn = self.get_conn().await?;
+        let statement = conn.prep(
+            "UPDATE territories SET (territory_id, owner_id, color, name) VALUES(:territory_id, :owner_id, :color, :name) WHERE territory_id = (territory_id) VALUES(:user_id)"
         )?;
 
         conn.exec_drop(

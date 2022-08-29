@@ -3,17 +3,17 @@ use std::fmt::{Debug, Display, Formatter};
 use chrono::{DateTime, Utc};
 
 pub struct Territory {
-    territory_id: u64,
-    owner_id: u64,
-    color_hex: String,
-    name: String
+    pub territory_id: u64,
+    pub owner_id: u64,
+    pub color: u32,
+    pub name: String
 }
 
 pub struct Country {
-    territory_id: u64,
-    country_id: u8,
-    troops: u32,
-    citizens: u32
+    pub territory_id: u64,
+    pub country_id: u8,
+    pub troops: u32,
+    pub citizens: u32
 }
 
 pub struct User {
@@ -23,17 +23,17 @@ pub struct User {
 }
 
 pub struct Building {
-    country_id: u8,
-    building_id: u64,
-    building_type: BuildingType
+    pub country_id: u8,
+    pub building_id: u64,
+    pub building_type: BuildingType
 }
 
 pub struct Conflict {
-    attack_id: u64,
-    aggressor_id: u64,
-    victim_country_id: u8,
-    aggressor_troops_engaged: u32,
-    arrival_date: DateTime<Utc>
+    pub attack_id: u64,
+    pub aggressor_id: u64,
+    pub victim_country_id: u8,
+    pub aggressor_troops_engaged: u32,
+    pub arrival_date: DateTime<Utc>
 }
 
 pub enum BuildingType {
@@ -59,9 +59,9 @@ impl BuildingType {
 }
 
 pub struct Vehicle {
-    territory_id: u64,
-    vehicle_id: u64,
-    vehicle_type: VehicleType
+    pub territory_id: u64,
+    pub vehicle_id: u64,
+    pub vehicle_type: VehicleType
 }
 
 pub enum VehicleType {

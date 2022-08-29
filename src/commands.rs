@@ -1,9 +1,7 @@
 use std::env;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
-use std::future::Future;
 use std::sync::Arc;
-use mysql::PooledConn;
 use serenity::client::{Context, EventHandler};
 use serenity::async_trait;
 use serenity::model::gateway::Ready;
