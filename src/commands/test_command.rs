@@ -1,13 +1,11 @@
 use std::error::Error;
-use std::ops::Add;
 use std::sync::Arc;
-use mysql::PooledConn;
 use serenity::client::Context;
 use serenity::model::application::interaction::InteractionResponseType;
 use serenity::async_trait;
 use serenity::model::prelude::interaction::application_command::ApplicationCommandInteraction;
 use crate::commands::{CommandHandler, CommandHandlerError};
-use crate::data_types::User;
+use crate::database::data_types::User;
 use crate::Database;
 
 pub struct TestCommandHandler {
