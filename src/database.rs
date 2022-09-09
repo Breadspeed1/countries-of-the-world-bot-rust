@@ -9,14 +9,20 @@ pub async fn get_conn_string() -> Result<String, Box<dyn Error>> {
     Ok(env::var("MYSQL_CONNECTION_STRING")?)
 }
 
+pub async fn get_history_storage_path() -> Result<String, Box<dyn Error>> {
+    Ok(env::var("HISTORY_STORAGE_PATH")?)
+}
+
 pub struct Database {
-    connection_factory: Arc<SqlConnectionFactory>
+    connection_factory: Arc<SqlConnectionFactory>,
+    history_storage_path: String
 }
 
 impl Database {
-    pub async fn new(connection_string: String) -> Result<Database, Box<dyn Error>> {
+    pub async fn new(connection_string: String, history_storage_path: String) -> Result<Database, Box<dyn Error>> {
         Ok(Database {
-            connection_factory: Arc::new(SqlConnectionFactory::new(connection_string.as_str()).await?)
+            connection_factory: Arc::new(SqlConnectionFactory::new(connection_string.as_str()).await?),
+            history_storage_path
         })
     }
 
@@ -96,8 +102,19 @@ impl Database {
 
         conn.exec_drop(
             &statement,
-            params! {"user_id" => user.user_id, "money" => user.money, "distance_traveled" => user.distance_traveled }
+            params! {
+                "territory_id" => territory.territory_id,
+                "owner_id" => territory.owner_id,
+                "color" => territory.color,
+                "name" => territory.name
+            }
         )?;
+
+        Ok(())
+    }
+
+    async fn log_command(&self, command: String) -> Result<(), Box<dyn Error>> {
+
 
         Ok(())
     }
@@ -106,7 +123,8 @@ impl Database {
 impl Clone for Database {
     fn clone(&self) -> Self {
         Database {
-            connection_factory: self.connection_factory.clone()
+            connection_factory: self.connection_factory.clone(),
+            history_storage_path: self.history_storage_path.clone()
         }
     }
 }
